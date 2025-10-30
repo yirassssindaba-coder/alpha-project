@@ -20,8 +20,8 @@ cd "C:\Users\ASUS\Desktop\time-series-forecasting"
 
 2. (Opsional) Set nama/email untuk commit lokal:
 ```powershell
-git config user.name "Nama Anda"
-git config user.email "email@anda.com"
+git config user.name "Roberto Ocaviantyo Tahta Laksmana"
+git config user.email "yirassssindaba@gmail.com"
 ```
 
 3. Inisialisasi repo, tambahkan semua file, dan commit:
@@ -165,3 +165,10 @@ notepad .\scripts\auto_push.ps1
 ## Catatan keamanan
 - Hati‑hati saat menggunakan `--force`; ini dapat menimpa riwayat remote.
 - Jangan commit kredensial atau file sensitif (.env, API keys).
+
+---
+
+## Kontak
+Nama: Roberto Ocaviantyo Tahta Laksmana  
+Email: yirassssindaba@gmail.com  
+GitHub: https://github.com/yirassssindaba-coder
