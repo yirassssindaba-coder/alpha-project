@@ -1,89 +1,81 @@
-# Add & Push Results — PowerShell Helper
+# Add & Push Results — PowerShell Helper (UPDATED repo locations)
 
-Skrip PowerShell ini membantu menyalin sebuah folder lokal (mis. hasil export/summary) ke dalam sebuah repository Git lokal/remote, membuat commit yang diperlukan, lalu melakukan push ke remote (dengan penanganan aman untuk repositori kosong / branch remote tidak ada).
+Skrip PowerShell ini menyalin folder hasil lokal ke repository Git, membuat commit bila perlu, lalu melakukan push ke remote. README ini sudah diperbarui karena lokasi repository remote telah berubah.
 
-Gunakan skrip ini bila Anda ingin mengunggah snapshot hasil (mis. folder hasil eksperimen, ringkasan, laporan) ke repository GitHub/Git remote secara otomatis.
+Baru: gunakan salah satu dari URL/command berikut untuk remote / cloning:
+- HTTPS remote:
+  ```
+  https://github.com/yirassssindaba-coder/social-media-sentiment-analysis-results.git
+  ```
+- SSH remote:
+  ```
+  git@github.com:yirassssindaba-coder/social-media-sentiment-analysis-results.git
+  ```
+- `gh` (GitHub CLI) clone:
+  ```
+  gh repo clone yirassssindaba-coder/social-media-sentiment-analysis-results
+  ```
 
-Catatan penting: baca bagian Prasyarat dan Konfigurasi sebelum menjalankan.
-
----
-
-## Fitur utama
-- Clone remote repository jika `LocalClone` belum ada.
-- Jika folder lokal sudah ada tetapi bukan repo git, inisialisasi repo dan tambahkan `origin`.
-- Menyalin seluruh isi `SourceFolder` ke subfolder di repo lokal (nama subfolder bisa diatur).
-- Jika repo kosong (tidak ada commit), buat initial commit otomatis sehingga checkout branch aman.
-- Membuat atau checkout branch target dengan aman.
-- Cek keberadaan branch di remote (`git ls-remote`) sebelum melakukan `git pull --rebase` untuk menghindari error `couldn't find remote ref`.
-- Stage, commit (hanya bila ada perubahan) dan push ke remote (dengan `-u` untuk membuat upstream bila belum ada).
-- Opsi untuk menjalankan `git lfs install` bila Anda menggunakan Git LFS (flag `UseGitLfs`).
-
----
-
-## Prasyarat
-- Git terpasang dan dapat dijalankan dari PATH (`git` tersedia di terminal PowerShell).
-- (Opsional) Jika menggunakan SSH remote, konfigurasi SSH keys dan gunakan URL remote `git@github.com:owner/repo.git`.
-- Jika menggunakan HTTPS untuk push ke GitHub, siapkan credential (Git akan meminta username/password; gunakan Personal Access Token (PAT) sebagai password bila diperlukan).
+Gunakan bentuk remote yang cocok untuk lingkungan Anda (HTTPS butuh PAT untuk push, SSH butuh SSH key terdaftar di GitHub).
 
 ---
 
-## Konfigurasi
-Edit bagian CONFIG di bagian atas skrip sebelum dijalankan:
+## Ringkasan
+- Tujuan: Salin folder hasil (mis. ringkasan, laporan) ke dalam repo git, commit hanya jika ada perubahan, dan push ke remote.
+- Behavior defensif: clone jika perlu, buat initial commit bila repo kosong, cek remote branch existence sebelum pull, set upstream saat push.
+- Tidak memodifikasi file remote selain yang Anda copy/commit.
 
-- `$SourceFolder`  
-  Path folder sumber yang ingin Anda salin ke repo (harus ada).
+---
 
-- `$RepoUrl`  
-  URL remote Git (HTTPS atau SSH) — contoh `https://github.com/owner/repo.git` atau `git@github.com:owner/repo.git`.
+## Persyaratan (Prerequisites)
+- Git terinstal dan berada di PATH.
+- (Opsional) Git LFS jika Anda ingin menyertakan file besar.
+- Jika push via HTTPS: gunakan Personal Access Token (PAT) sebagai password.
+- Jika push via SSH: pastikan SSH key Anda sudah ditambahkan ke GitHub dan remote menggunakan format `git@github.com:...`.
 
-- `$LocalClone`  
-  Path folder lokal tempat repo akan di-clone atau digunakan.
+---
 
-- `$Branch`  
-  Nama branch target (mis. `main` atau `master` atau branch lain).
+## Konfigurasi (contoh)
+Edit variabel di bagian CONFIG sebelum menjalankan skrip.
 
-- `$Subfolder`  
-  Nama subfolder di dalam repo tempat isi `$SourceFolder` akan dicopy. Jika kosong, otomatis digunakan `basename` dari `$SourceFolder`.
-
-- `$UseGitLfs`  
-  `$true` jika Anda ingin menjalankan `git lfs install` (pastikan git-lfs sudah terinstal), `$false` jika tidak.
-
-Contoh pengaturan awal (ubah sesuai lingkungan Anda):
+Contoh default (sudah disesuaikan ke lokasi remote baru):
 ```powershell
 # ===== CONFIG =====
-$SourceFolder = "C:\path\to\results"
-$RepoUrl     = "https://github.com/yourusername/yourrepo.git"
-$LocalClone  = "C:\path\to\local-repo"
+$SourceFolder = "C:\Users\ASUS\Desktop\python-project-remote\results_summary-20251029-202723"
+$RepoUrl     = "https://github.com/yirassssindaba-coder/social-media-sentiment-analysis-results.git"
+# Alternatif (SSH)
+# $RepoUrl   = "git@github.com:yirassssindaba-coder/social-media-sentiment-analysis-results.git"
+$LocalClone  = "C:\Users\ASUS\Desktop\alpha-project"
 $Branch      = "main"
-$Subfolder   = ""
+$Subfolder   = ""      # empty -> use basename of SourceFolder
 $UseGitLfs   = $false
-# ====================
+# ==================
 ```
+
+- `$SourceFolder`: folder yang akan dicopy (harus ada).
+- `$RepoUrl`: remote target (ubah sesuai HTTPS atau SSH).
+- `$LocalClone`: lokasi clone lokal (jika tidak ada, skrip akan meng-clone).
+- `$Branch`: branch tujuan.
+- `$Subfolder`: nama subfolder di repo tempat file akan dicopy (kosong => menggunakan nama folder sumber).
+- `$UseGitLfs`: set ke `$true` jika ingin menjalankan `git lfs install`.
 
 ---
 
 ## Cara menjalankan
-Ada dua cara:
-
-1. Menjalankan interaktif (paste):
-   - Buka PowerShell (bukan ISE; gunakan PowerShell 5+ atau PowerShell Core).
-   - Edit variabel di bagian CONFIG.
-   - Salin seluruh isi skrip (seluruh file) lalu paste ke jendela PowerShell, tekan Enter.
-
-2. Menyimpan sebagai file `.ps1` lalu menjalankan:
-   - Simpan skrip sebagai `add-and-push-results.ps1`.
-   - Buka PowerShell, pindah ke folder skrip.
-   - Jalankan:
+1. Buka PowerShell.
+2. Edit bagian CONFIG di atas sesuai lingkungan Anda.
+3. Salin seluruh skrip di bawah (blok PowerShell) lalu paste ke jendela PowerShell dan tekan Enter.
+   - Atau simpan sebagai `add-and-push-results.ps1` dan jalankan:
      ```powershell
      Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
      .\add-and-push-results.ps1
      ```
 
-Skrip akan mencetak log langkah demi langkah dan mengarahkan bila ada kesalahan.
+Skrip akan menampilkan log langkah demi langkah dan memberi petunjuk jika terjadi masalah (git tidak ada, folder sumber tidak ditemukan, autentikasi gagal, dll).
 
 ---
 
-## Isi skrip (salin & tempel seluruh blok ini ke PowerShell)
+## Skrip (salin & paste seluruh blok ini ke PowerShell)
 ```powershell
 # Robust PowerShell script to copy a local folder into a git repo and push,
 # with safe remote-branch detection to avoid "couldn't find remote ref" errors.
@@ -92,7 +84,7 @@ Skrip akan mencetak log langkah demi langkah dan mengarahkan bila ada kesalahan.
 
 # ===== CONFIG =====
 $SourceFolder = "C:\Users\ASUS\Desktop\python-project-remote\results_summary-20251029-202723"
-$RepoUrl     = "https://github.com/yirassssindaba-coder/alpha-project.git"   # or SSH git@github.com:owner/repo.git
+$RepoUrl     = "https://github.com/yirassssindaba-coder/social-media-sentiment-analysis-results.git"   # or SSH: git@github.com:yirassssindaba-coder/social-media-sentiment-analysis-results.git
 $LocalClone  = "C:\Users\ASUS\Desktop\alpha-project"
 $Branch      = "main"
 $Subfolder   = ""      # empty -> use basename of SourceFolder
@@ -241,3 +233,19 @@ try {
 Write-Host "`nFinished. Local repo at: $ResolvedLocalClone"
 Write-Host "If authentication fails, use a Personal Access Token for HTTPS or configure SSH keys for SSH remotes."
 ```
+
+---
+
+## Troubleshooting & tips
+- Jika Anda melihat `fatal: couldn't find remote ref main` — ini berarti branch `main` belum ada di remote. Skrip sudah memeriksa keberadaan branch di remote; jika tidak ada, skrip melewati `git pull` dan akan membuat upstream saat `git push -u origin <branch>`.
+- Autentikasi:
+  - HTTPS: saat diminta username gunakan username GitHub Anda; untuk password gunakan PAT (Personal Access Token) dengan scope `repo`.
+  - SSH: pastikan private key tersedia di `~/.ssh` dan public key telah ditambahkan ke GitHub.
+- Jika push gagal karena credential manager: pasang Git Credential Manager (GCM) atau gunakan SSH.
+
+---
+
+Jika Anda mau, saya dapat:
+- Memperbarui skrip agar default `$RepoUrl` langsung mengarah ke `social-media-sentiment-analysis-results` (sudah saya lakukan di contoh di atas).
+- Membuat contoh one-liner non-interactive (SSH) yang otomatis commit tanpa prompt (butuh SSH key).
+- Membuat versi yang hanya menyalin hasil ke folder lokal (tanpa git) — beri tahu jika Anda ingin itu.
